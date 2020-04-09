@@ -31,7 +31,7 @@ class Virus : Application() {
     private var recoveredLast = 0
     private var recovered = 0
     private val infectionRadius = SimpleDoubleProperty()
-    private val hospital_capacity = SimpleDoubleProperty()
+    private val hospitalCapacity = SimpleDoubleProperty()
 
     private fun Region.setBackground(color: Color) {
         background = Background(BackgroundFill(color, CornerRadii.EMPTY, simulation.insets))
@@ -157,9 +157,12 @@ class Virus : Application() {
         simulation.setBorder(Color.WHITE, 5.0)
         graph.setBackground(Color.BLACK)
         createPopulation()
-        val y = HEIGHT - hospital_capacity.get() * (HEIGHT / POPULATION)
-        println(y)
-        val capacity = Line(0.0, y, WIDTH, y)
+        val y = SimpleDoubleProperty(HEIGHT).subtract(hospitalCapacity.multiply(HEIGHT / POPULATION))
+        val capacity = Line()
+        capacity.startX = 0.0
+        capacity.endX = WIDTH
+        capacity.startYProperty().bind(y)
+        capacity.endYProperty().bind(y)
         capacity.stroke = Color.WHITE
         graph.children.add(capacity)
         infect(people.first())
@@ -172,25 +175,34 @@ class Virus : Application() {
             deadLast = dead
             infect()
             updateGraph(infectionsLast, infected.size, Color.RED)
-            println(lethality(infected.size) * HEIGHT)
             updateGraph(lethality(infectionsLast), lethality(infected.size), Color.ORANGE, yScale = HEIGHT)
             infectionsLast = infected.size
             updateGraph(suspectedLast, suspected.size, Color.BLUE)
             suspectedLast = suspected.size
             day++
         }
-        val label1 = Label("  Infektionsradius: ")
-        val s1 = Slider(1.0, 50.0, 15.0)
-        infectionRadius.bind(s1.valueProperty())
-        val label2 = Label("    Hospitalcapacity: ")
-        val s2 = Slider(1.0,50.0,15.0)
-        hospital_capacity.bind(s2.valueProperty())
-        stage.scene = Scene(VBox(20.0, HBox(simulation, graph), HBox(10.0, label1, s1, label2, s2)))
+        val labelInfectionRadius = Label("  Infektionsradius: ")
+        val sliderInfectionRadius = Slider(1.0, 50.0, 15.0)
+        infectionRadius.bind(sliderInfectionRadius.valueProperty())
+        val labelHospitalCapacity = Label("    Krankenhauskapazität: ")
+        val sliderHospitalCapacity = Slider(1.0, 50.0, 15.0)
+        hospitalCapacity.bind(sliderHospitalCapacity.valueProperty())
+        stage.scene = Scene(
+            VBox(
+                20.0,
+                HBox(simulation, graph),
+                HBox(
+                    10.0,
+                    labelInfectionRadius, sliderInfectionRadius,
+                    labelHospitalCapacity, sliderHospitalCapacity
+                )
+            )
+        )
         stage.show()
     }
 
     private fun lethality(infections: Int): Double {
-        val pTreatment = (hospital_capacity.get() / infections).coerceAtMost(1.0)
+        val pTreatment = (hospitalCapacity.get() / infections).coerceAtMost(1.0)
         val pDiesWithTreatment = pTreatment * LETHALITY_WITH_TREATMENT
         val pDiesWithoutTreatment = (1.0 - pTreatment) * LETHALITY_WITHOUT_TREATMENT
         return pDiesWithTreatment + pDiesWithoutTreatment

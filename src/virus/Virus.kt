@@ -31,6 +31,7 @@ class Virus : Application() {
     private var recoveredLast = 0
     private var recovered = 0
     private val infectionRadius = SimpleDoubleProperty()
+    private val hospital_capacity = SimpleDoubleProperty()
 
     private fun Region.setBackground(color: Color) {
         background = Background(BackgroundFill(color, CornerRadii.EMPTY, simulation.insets))
@@ -156,7 +157,7 @@ class Virus : Application() {
         simulation.setBorder(Color.WHITE, 5.0)
         graph.setBackground(Color.BLACK)
         createPopulation()
-        val y = HEIGHT - HOSPITAL_CAPACITY * (HEIGHT / POPULATION)
+        val y = HEIGHT - hospital_capacity.get() * (HEIGHT / POPULATION)
         println(y)
         val capacity = Line(0.0, y, WIDTH, y)
         capacity.stroke = Color.WHITE
@@ -178,15 +179,18 @@ class Virus : Application() {
             suspectedLast = suspected.size
             day++
         }
-        val label = Label("  Infektionsradius: ")
-        val s = Slider(1.0, 50.0, 15.0)
-        infectionRadius.bind(s.valueProperty())
-        stage.scene = Scene(VBox(20.0, HBox(simulation, graph), HBox(10.0, label, s)))
+        val label1 = Label("  Infektionsradius: ")
+        val s1 = Slider(1.0, 50.0, 15.0)
+        infectionRadius.bind(s1.valueProperty())
+        val label2 = Label("    Hospitalcapacity: ")
+        val s2 = Slider(1.0,50.0,15.0)
+        hospital_capacity.bind(s2.valueProperty())
+        stage.scene = Scene(VBox(20.0, HBox(simulation, graph), HBox(10.0, label1, s1, label2, s2)))
         stage.show()
     }
 
     private fun lethality(infections: Int): Double {
-        val pTreatment = (HOSPITAL_CAPACITY.toDouble() / infections).coerceAtMost(1.0)
+        val pTreatment = (hospital_capacity.get() / infections).coerceAtMost(1.0)
         val pDiesWithTreatment = pTreatment * LETHALITY_WITH_TREATMENT
         val pDiesWithoutTreatment = (1.0 - pTreatment) * LETHALITY_WITHOUT_TREATMENT
         return pDiesWithTreatment + pDiesWithoutTreatment
@@ -213,7 +217,6 @@ class Virus : Application() {
         private const val VELOCITY = 3
         private const val LETHALITY_WITH_TREATMENT = 0.01
         private const val LETHALITY_WITHOUT_TREATMENT = 0.5
-        private const val HOSPITAL_CAPACITY = 20
         private val DAY = Duration.seconds(1.0)
 
         @JvmStatic

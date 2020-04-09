@@ -1,16 +1,19 @@
 package virus
 
-import virus.Virus.State.*
 import javafx.animation.*
 import javafx.application.Application
+import javafx.beans.property.SimpleDoubleProperty
 import javafx.event.EventHandler
 import javafx.scene.Scene
+import javafx.scene.control.Label
+import javafx.scene.control.Slider
 import javafx.scene.layout.*
 import javafx.scene.paint.Color
 import javafx.scene.shape.Circle
 import javafx.scene.shape.Line
 import javafx.stage.Stage
 import javafx.util.Duration
+import virus.Virus.State.*
 import kotlin.math.*
 import kotlin.random.Random
 
@@ -27,6 +30,7 @@ class Virus : Application() {
     private var dead = 0
     private var recoveredLast = 0
     private var recovered = 0
+    private val infectionRadius = SimpleDoubleProperty()
 
     private fun Region.setBackground(color: Color) {
         background = Background(BackgroundFill(color, CornerRadii.EMPTY, simulation.insets))
@@ -75,7 +79,7 @@ class Virus : Application() {
                 val x2 = victim.circle.centerX
                 val y2 = victim.circle.centerY
                 val dist = sqrt((x1 - x2).pow(2) + (y1 - y2).pow(2))
-                if (dist <= INFECTION_RADIUS) {
+                if (dist <= infectionRadius.get()) {
                     infectors.add(infector)
                     infect(victim)
                 }
@@ -95,7 +99,7 @@ class Virus : Application() {
                 }
 
                 override fun interpolate(frac: Double) {
-                    r.radius = frac * INFECTION_RADIUS
+                    r.radius = frac * infectionRadius.get()
                 }
             }
             t.play()
@@ -149,6 +153,7 @@ class Virus : Application() {
         simulation.setPrefSize(WIDTH, HEIGHT)
         graph.setPrefSize(WIDTH, HEIGHT)
         simulation.setBackground(Color.BLACK)
+        simulation.setBorder(Color.WHITE, 5.0)
         graph.setBackground(Color.BLACK)
         createPopulation()
         val y = HEIGHT - HOSPITAL_CAPACITY * (HEIGHT / POPULATION)
@@ -173,7 +178,10 @@ class Virus : Application() {
             suspectedLast = suspected.size
             day++
         }
-        stage.scene = Scene(HBox(simulation, graph))
+        val label = Label("  Infektionsradius: ")
+        val s = Slider(1.0, 50.0, 15.0)
+        infectionRadius.bind(s.valueProperty())
+        stage.scene = Scene(VBox(20.0, HBox(simulation, graph), HBox(10.0, label, s)))
         stage.show()
     }
 
@@ -197,11 +205,10 @@ class Virus : Application() {
     }
 
     companion object {
-        private const val WIDTH = 1000.0
-        private const val HEIGHT = 1000.0
+        private const val WIDTH = 800.0
+        private const val HEIGHT = 800.0
         private const val BORDER = 20.0
         private const val RADIUS = 5.0
-        private const val INFECTION_RADIUS = 15.0
         private const val POPULATION = 100
         private const val VELOCITY = 3
         private const val LETHALITY_WITH_TREATMENT = 0.01

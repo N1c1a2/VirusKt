@@ -32,6 +32,9 @@ class Virus : Application() {
     private var recovered = 0
     private val infectionRadius = SimpleDoubleProperty()
     private val hospitalCapacity = SimpleDoubleProperty()
+    private val velocity = SimpleDoubleProperty()
+    private val lethalityWithTreatment = SimpleDoubleProperty()
+    private val lethalityWithoutTreatment = SimpleDoubleProperty()
 
     private fun Region.setBackground(color: Color) {
         background = Background(BackgroundFill(color, CornerRadii.EMPTY, simulation.insets))
@@ -60,8 +63,8 @@ class Virus : Application() {
     private fun move() {
         for (p in people) {
             val c = p.circle
-            c.centerX += sin(p.direction) * VELOCITY
-            c.centerY += cos(p.direction) * VELOCITY
+            c.centerX += sin(p.direction) * velocity.get()
+            c.centerY += cos(p.direction) * velocity.get()
             if (c.centerX !in BORDER..WIDTH - BORDER || c.centerY !in BORDER..HEIGHT - BORDER) {
                 p.direction += PI
             } else if (Random.nextFloat() <= 0.05) {
@@ -187,6 +190,15 @@ class Virus : Application() {
         val labelHospitalCapacity = Label("    Krankenhauskapazität: ")
         val sliderHospitalCapacity = Slider(1.0, 50.0, 15.0)
         hospitalCapacity.bind(sliderHospitalCapacity.valueProperty())
+        val labelVelocity = Label(" Geschwindigkeit: ")
+        val sliderVelocity = Slider(1.0,10.0,3.0)
+        velocity.bind(sliderVelocity.valueProperty())
+        val labelLethalityWithTreatment = Label("   Mortalitätsrate mit Behandlung: ")
+        val sliderLethalityWithTreatment = Slider(0.1,1.0,0.3)
+        lethalityWithTreatment.bind(sliderLethalityWithTreatment.valueProperty())
+        val labelLethalityWithoutTreatment = Label("   Mortalitätsrate ohne Behandlung: ")
+        val sliderLethalityWithoutTreatment = Slider(0.1,1.0,0.3)
+        lethalityWithoutTreatment.bind(sliderLethalityWithoutTreatment.valueProperty())
         stage.scene = Scene(
             VBox(
                 20.0,
@@ -194,7 +206,10 @@ class Virus : Application() {
                 HBox(
                     10.0,
                     labelInfectionRadius, sliderInfectionRadius,
-                    labelHospitalCapacity, sliderHospitalCapacity
+                    labelHospitalCapacity, sliderHospitalCapacity,
+                    labelVelocity, sliderVelocity,
+                    labelLethalityWithTreatment, sliderLethalityWithTreatment,
+                    labelLethalityWithoutTreatment, sliderLethalityWithoutTreatment
                 )
             )
         )
@@ -203,8 +218,8 @@ class Virus : Application() {
 
     private fun lethality(infections: Int): Double {
         val pTreatment = (hospitalCapacity.get() / infections).coerceAtMost(1.0)
-        val pDiesWithTreatment = pTreatment * LETHALITY_WITH_TREATMENT
-        val pDiesWithoutTreatment = (1.0 - pTreatment) * LETHALITY_WITHOUT_TREATMENT
+        val pDiesWithTreatment = pTreatment * lethalityWithTreatment.get()
+        val pDiesWithoutTreatment = (1.0 - pTreatment) * lethalityWithoutTreatment.get()
         return pDiesWithTreatment + pDiesWithoutTreatment
     }
 
@@ -226,9 +241,6 @@ class Virus : Application() {
         private const val BORDER = 20.0
         private const val RADIUS = 5.0
         private const val POPULATION = 100
-        private const val VELOCITY = 3
-        private const val LETHALITY_WITH_TREATMENT = 0.01
-        private const val LETHALITY_WITHOUT_TREATMENT = 0.5
         private val DAY = Duration.seconds(1.0)
 
         @JvmStatic

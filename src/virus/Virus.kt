@@ -35,6 +35,9 @@ class Virus : Application() {
     private val velocity = SimpleDoubleProperty()
     private val lethalityWithTreatment = SimpleDoubleProperty()
     private val lethalityWithoutTreatment = SimpleDoubleProperty()
+    private val pToTravel = SimpleDoubleProperty()
+    private val pAsymptomaticDisease = SimpleDoubleProperty()
+    private val pMovementToCentralHub = SimpleDoubleProperty()
 
     private fun Region.setBackground(color: Color) {
         background = Background(BackgroundFill(color, CornerRadii.EMPTY, simulation.insets))

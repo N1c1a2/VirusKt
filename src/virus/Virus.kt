@@ -13,7 +13,7 @@ import javafx.scene.shape.Circle
 import javafx.scene.shape.Line
 import javafx.stage.Stage
 import javafx.util.Duration
-import virus.Virus.State.*
+import virus.State.*
 import kotlin.math.*
 import kotlin.random.Random
 
@@ -44,7 +44,7 @@ class Virus : Application() {
     }
 
     private fun infect(person: Person) {
-        person.state = Infected(days = 0)
+        person.state = Infected(ticks = 0)
         person.circle.fill = Color.RED
         suspected.remove(person)
         infected.add(person)
@@ -150,7 +150,7 @@ class Virus : Application() {
     private fun remove() {
         for (p in infected.toList()) {
             val s = p.state as Infected
-            if (s.days++ == 14) {
+            if (s.ticks++ == 14) {
                 remove(p)
             }
         }
@@ -250,13 +250,5 @@ class Virus : Application() {
         fun main(args: Array<String>) {
             launch(Virus::class.java, *args)
         }
-    }
-
-    class Person(var direction: Double, var state: State, val circle: Circle)
-
-    sealed class State {
-        object Suspected : State()
-        data class Infected(var days: Int) : State()
-        data class Removed(val dead: Boolean) : State()
     }
 }

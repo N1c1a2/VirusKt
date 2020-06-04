@@ -1,5 +1,5 @@
 /**
- *@author Nikolaus Knop
+ *@author Nikolaus Knop and Niclas Thiebach
  */
 
 package virus

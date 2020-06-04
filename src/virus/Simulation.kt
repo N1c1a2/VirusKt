@@ -1,5 +1,5 @@
 /**
- *@author Nikolaus Knop
+ *@author Nikolaus Knop and Niclas Thiebach
  */
 
 package virus
@@ -22,7 +22,7 @@ class Simulation : Application() {
     private var play = false
     private val simulation = Pane()
     private val quarantine = Pane()
-    private val statistics = Statistics(1.0, 10.0)
+    private val statistics = Statistics(1.0, 8.0)
     private val config = Configuration(columns = 3)
     private val people = mutableListOf<Person>()
     private val suspectedPeople = mutableSetOf<Person>()

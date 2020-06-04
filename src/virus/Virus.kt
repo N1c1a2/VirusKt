@@ -243,7 +243,7 @@ class Virus : Application() {
         private const val HEIGHT = 800.0
         private const val BORDER = 20.0
         private const val RADIUS = 5.0
-        private const val POPULATION = 100
+        private const val POPULATION = 250
         private val DAY = Duration.seconds(1.0)
 
         @JvmStatic
